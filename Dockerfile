@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.1.1-base
+FROM nvidia/cuda:11.2.2-base-ubuntu18.04
 
 ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
@@ -13,13 +13,32 @@ ENV TREX_URL="https://github.com/trexminer/T-Rex/releases/download/0.24.5/t-rex-
 
 ADD config/config.json /home/nobody/
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget libnvidia-ml-dev \
+FROM nvidia/cuda:11.2.2-base-ubuntu18.04
+
+RUN set -ex \
+  && apt update \
+  && apt upgrade -y \
+  && apt update \
+  && apt install -y \
+    bzip2 \
+    software-properties-common \
+    tzdata \
+    wget \
+    xterm \
+    xinit \
+  && add-apt-repository -y ppa:graphics-drivers \
+  && apt install -y \
+    nvidia-driver-460 \
+    nvidia-utils-460 \
+    xserver-xorg-video-nvidia-460 \
+    nvidia-opencl-dev \
+    nvidia-settings \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir /trex \
     && wget --no-check-certificate $TREX_URL \
     && tar -xvf ./*.tar.gz  -C /trex \
     && rm *.tar.gz
+    
 
 WORKDIR /trex
 
